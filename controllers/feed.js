@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 exports.getPosts = (req, res, next) => {
   // Sending the json response
   // you can see response header [Content-Type:application/json]
@@ -18,6 +19,16 @@ exports.getPosts = (req, res, next) => {
 };
 
 exports.createPost = (req, res, next) => {
+  /** CHECKING VALIDATION  */
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({
+        message: "Validation Failed, enter data correct ",
+        errors: errors.array(),
+      });
+  }
   title = req.body.title;
   content = req.body.content;
   // create post in DB.
