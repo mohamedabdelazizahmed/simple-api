@@ -6,6 +6,7 @@ POST  http://localhost:8080/feed/post
 Content-Type: application/json
 
 {
-    "title":"Client REST API",
-    "content":"The Reust sended by Client RESTAPI"
+    "title":"Client REST API-with mongoose",
+    "imageUrl":"images/part-one/CROS.PNG",
+    "content":"The Reust sended by Client RESTAPI after connect with package mongoose"
 }
