@@ -1,3 +1,4 @@
+const path = require("path");
 /**
  *  npm init , npm install --save express body-parser
  *  npm install --save-dev nodemon
@@ -13,6 +14,7 @@ const app = express();
 
 // app.use(bodyParser.urlencoded())  DataFormat in form  x-www-form-urlencoded <form>
 app.use(bodyParser.json()); //in request header application/json
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 /** Resolve the CROS problem  */
 app.use((req, res, next) => {
@@ -26,7 +28,13 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRoutes);
-
+// this middleware run when forward  after next(err) for any Error
+app.use((err, req, res, next) => {
+  console.log(err);
+  const status = err.statusCode || 500;
+  const message = err.message;
+  res.status(status).json({message: message});
+});
 mongoose
   .connect(MONGOOSE_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {

@@ -1,5 +1,8 @@
 const express = require("express");
-const { body } = require("express-validator");
+/**
+ *  npm install --save express-validator
+ */
+const { body } = require("express-validator/check");
 
 const feeController = require("../controllers/feed");
 const router = express.Router();

@@ -25,30 +25,36 @@ exports.createPost = (req, res, next) => {
   /** CHECKING VALIDATION  */
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({
-        message: "Validation Failed, enter data correct ",
-        errors: errors.array(),
-      });
+    // to exit file execution 
+    const error = new Error('Validation Failed, enter data correct ');
+    // create custom property 
+    error.statusCode = 422;
+    throw error
   }
   title = req.body.title;
   content = req.body.content;
   // create post in DB.
-   const post = new Post ({
+  const post = new Post({
     title: title,
-    imageUrl:'images/part-one/CROS.PNG',
+    imageUrl: 'images/part-one/CROS.PNG',
     content: content,
     creator: {
       name: "Mohamedabdelaziz",
     }
-   });
-   post.save().then(result => {
+  });
+  post.save().then(result => {
     console.log(result);
     res.status(201).json({
       message: "The post created Successfully ",
       post: result
     });
-   }).catch(err=> console.log(err));
-  
+  }).catch(err => { 
+    console.log(err) ;
+    if (!err.statusCode ) {
+      err.statusCode = 500;
+    }
+    // to Go Another Middleware handling error ...
+    next(err);
+  });
+
 };
