@@ -20,4 +20,7 @@ router.post(
   feeController.createPost
 );
 
+//GET /post/:postId
+router.get("/post/:postId", feeController.getPost);
+
 module.exports = router;

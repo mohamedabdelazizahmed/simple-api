@@ -10,3 +10,6 @@ Content-Type: application/json
     "imageUrl":"images/part-one/CROS.PNG",
     "content":"The Reust sended by Client RESTAPI after connect with package mongoose-v2"
 }
+#####
+## GET Post
+GET  http://localhost:8080/feed/post/5ea4aa2cfef08c3bac4cd3c3
