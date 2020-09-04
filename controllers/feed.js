@@ -26,12 +26,21 @@ exports.createPost = (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
+  // checking file in request to validation
+  if (!req.file) {
+    const error = new Error("No Image Provided .");
+    err.statusCode = 422;
+    throw err;
+  }
+  const imageUrl = req.file.path;
+
   title = req.body.title;
   content = req.body.content;
   // create post in DB.
   const post = new Post({
     title: title,
-    imageUrl: "images/part-one/CROS.PNG",
+    // imageUrl: "images/part-one/CROS.PNG",
+    imageUrl: imageUrl,
     content: content,
     creator: {
       name: "Mohamedabdelaziz",
