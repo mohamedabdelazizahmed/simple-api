@@ -23,4 +23,14 @@ router.post(
 //GET /post/:postId
 router.get("/post/:postId", feeController.getPost);
 
+// PUT /post/:postId
+router.put(
+  "/post/:postId",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  feeController.updatePost
+);
+
 module.exports = router;
