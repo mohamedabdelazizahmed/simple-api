@@ -4,11 +4,21 @@ const Post = require("../models/post");
 const post = require("../models/post");
 
 exports.getPosts = (req, res, next) => {
+  //add pagination
+  const currentPage = req.query.params || 1;
+  const perPage = 2; // you can send it from frontend and make it dynamic
+  let totalItems;
+
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find().skip((currentPage - 1) * perPage).limit(perPage);
+    })
     .then((posts) => {
       res
         .status(200)
-        .json({ message: "Fetched posts successfully.", posts: posts });
+        .json({ message: "Fetched posts successfully.", posts: posts, totalItems:totalItems });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -172,3 +182,21 @@ exports.deletePost = (req, res, next) => {
       next(error);
     });
 };
+/**
+ *  get all posts before pagination
+ */
+function getPostsBeforePagination() {
+  // before pagination
+  Post.find()
+    .then((posts) => {
+      res
+        .status(200)
+        .json({ message: "Fetched posts successfully.", posts: posts });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+}
