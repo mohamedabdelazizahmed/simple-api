@@ -32,5 +32,7 @@ router.put(
   ],
   feeController.updatePost
 );
+// DELETE  /post/:postId
+router.delete("/post/:postId", feeController.deletePost);
 
 module.exports = router;

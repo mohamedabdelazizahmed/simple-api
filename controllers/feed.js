@@ -100,7 +100,7 @@ exports.updatePost = (req, res, next) => {
   }
   const title = req.body.title;
   const content = req.body.content;
-  const imageUrl = req.body.image;
+  const imageUrl = req.body.image; // my be null
 
   // if pick new file
   if (req.file) {
@@ -146,4 +146,29 @@ const clearImage = (filePath) => {
   fs.unlink(filePath, (error) => {
     console.log(error);
   });
+};
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error(`Could not find post.`);
+        error.statusCode = 404;
+        throw error;
+      }
+      // checked logged in user
+      // clear Image
+      clearImage(post.imageUrl);
+      return Post.findByIdAndRemove(postId);
+    })
+    .then((result) => {
+      console.log(result);
+      return res.status(200).json({ message: "Deleted Post ." });
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+      next(error);
+    });
 };
