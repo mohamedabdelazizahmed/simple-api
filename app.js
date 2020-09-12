@@ -63,8 +63,10 @@ app.use((err, req, res, next) => {
   console.log(err);
   const status = err.statusCode || 500;
   const message = err.message;
-  res.status(status).json({ message: message });
+  const data = err.data;
+  res.status(status).json({ message: message  , data :data});
 });
+
 mongoose
   .connect(MONGOOSE_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
