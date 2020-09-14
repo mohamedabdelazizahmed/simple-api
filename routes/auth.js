@@ -22,7 +22,7 @@ router.put(
           if (userDoc) {
             return Promise.reject("E-mail Address already exists.");
           }
-        });
+        }); 
       })
       .normalizeEmail(),
     body("password").trim().isLength({ min: 5 }),
