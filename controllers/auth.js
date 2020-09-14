@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.signup = (req, res, next) => {
   // add validation
@@ -46,16 +47,27 @@ exports.login = (req, res, next) => {
     .then((user) => {
       if (!user) {
         const error = new Error("A user with this email could not be found");
-        error.statusCode = 401; 
+        error.statusCode = 401;
         throw error;
       }
       loadedUser = user;
       return bcrypt.compare(password, user.password);
     })
     .then((isEqual) => {
-      const error = new Error('wrong password');
-      error.statusCode = 401;
-      throw error;
+      if (!isEqual) {
+        const error = new Error("wrong password");
+        error.statusCode = 401;
+        throw error;
+      }
+      const token = jwt.sign(
+        {
+          email: loadedUser.email,
+          userId: loadedUser._id.toString(),
+        },
+        "somesupersecretsecret",
+        { expiresIn: "1h" }
+      );
+      res.status(200).json({ token: token, userId: loadedUser._id.toString() });
     })
     .catch((error) => {
       if (!error.statusCode) {
