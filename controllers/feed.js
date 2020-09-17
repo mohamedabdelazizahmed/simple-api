@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
-const post = require("../models/post");
+const User = require("../models/user");
 
 exports.getPosts = (req, res, next) => {
   //add pagination
@@ -54,23 +54,32 @@ exports.createPost = (req, res, next) => {
 
   title = req.body.title;
   content = req.body.content;
+  let creator;
   // create post in DB.
   const post = new Post({
     title: title,
     // imageUrl: "images/part-one/CROS.PNG",
     imageUrl: imageUrl,
     content: content,
-    creator: {
-      name: "Mohamedabdelaziz",
-    },
+    creator: req.userId,
   });
   post
     .save()
     .then((result) => {
+      return User.findById(req.userId)
+    })
+    .then((user) => {
+      console.log(user);
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then((result) => {
       console.log(result);
       res.status(201).json({
         message: "The post created Successfully ",
-        post: result,
+        post: post,
+        creator: {_id: creator._id , name:creator.name}
       });
     })
     .catch((err) => {
@@ -205,4 +214,54 @@ function getPostsBeforePagination() {
       }
       next(err);
     });
+}
+
+function savePostBeforeConnectRelationWithUser(req,res,,next) {
+   /** CHECKING VALIDATION  */
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     // to exit file execution
+     const error = new Error("Validation Failed, enter data correct ");
+     // create custom property
+     error.statusCode = 422;
+     throw error;
+   }
+   // checking file in request to validation
+   if (!req.file) {
+     const error = new Error("No Image Provided .");
+     err.statusCode = 422;
+     throw err;
+   }
+   const imageUrl = req.file.path;
+ 
+   title = req.body.title;
+   content = req.body.content;
+   // create post in DB.
+   const post = new Post({
+     title: title,
+     // imageUrl: "images/part-one/CROS.PNG",
+     imageUrl: imageUrl,
+     content: content,
+     creator: {
+       name: "Mohamedabdelaziz",
+     },
+   });
+   post
+     .save()
+     .then((result) => {
+       console.log(result);
+       res.status(201).json({
+         message: "The post created Successfully ",
+         post: result,
+       });
+     })
+     .catch((err) => {
+       console.log(err);
+       if (!err.statusCode) {
+         err.statusCode = 500;
+       }
+       // to Go Another Middleware handling error ...
+       next(err);
+     });
+  
 }
