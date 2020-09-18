@@ -3,35 +3,28 @@ const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 const User = require("../models/user");
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
   //add pagination
   const currentPage = req.query.params || 1;
   const perPage = 2; // you can send it from frontend and make it dynamic
   let totalItems;
-
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      res
-        .status(200)
-        .json({
-          message: "Fetched posts successfully.",
-          posts: posts,
-          totalItems: totalItems,
-        });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .populate("creator")
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    res.status(200).json({
+      message: "Fetched posts successfully.",
+      posts: posts,
+      totalItems: totalItems,
     });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 exports.createPost = (req, res, next) => {
@@ -66,7 +59,7 @@ exports.createPost = (req, res, next) => {
   post
     .save()
     .then((result) => {
-      return User.findById(req.userId)
+      return User.findById(req.userId);
     })
     .then((user) => {
       console.log(user);
@@ -79,7 +72,7 @@ exports.createPost = (req, res, next) => {
       res.status(201).json({
         message: "The post created Successfully ",
         post: post,
-        creator: {_id: creator._id , name:creator.name}
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {
@@ -197,7 +190,7 @@ exports.deletePost = (req, res, next) => {
       return Post.findByIdAndRemove(postId);
     })
     .then((result) => {
-       return User.findById(req.userId);
+      return User.findById(req.userId);
     })
     .then((user) => {
       user.posts.pull(postId);
@@ -232,52 +225,51 @@ function getPostsBeforePagination() {
     });
 }
 
-function savePostBeforeConnectRelationWithUser(req,res,,next) {
-   /** CHECKING VALIDATION  */
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) {
-     // to exit file execution
-     const error = new Error("Validation Failed, enter data correct ");
-     // create custom property
-     error.statusCode = 422;
-     throw error;
-   }
-   // checking file in request to validation
-   if (!req.file) {
-     const error = new Error("No Image Provided .");
-     err.statusCode = 422;
-     throw err;
-   }
-   const imageUrl = req.file.path;
- 
-   title = req.body.title;
-   content = req.body.content;
-   // create post in DB.
-   const post = new Post({
-     title: title,
-     // imageUrl: "images/part-one/CROS.PNG",
-     imageUrl: imageUrl,
-     content: content,
-     creator: {
-       name: "Mohamedabdelaziz",
-     },
-   });
-   post
-     .save()
-     .then((result) => {
-       console.log(result);
-       res.status(201).json({
-         message: "The post created Successfully ",
-         post: result,
-       });
-     })
-     .catch((err) => {
-       console.log(err);
-       if (!err.statusCode) {
-         err.statusCode = 500;
-       }
-       // to Go Another Middleware handling error ...
-       next(err);
-     });
-  
+function savePostBeforeConnectRelationWithUser(req, res, next) {
+  /** CHECKING VALIDATION  */
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // to exit file execution
+    const error = new Error("Validation Failed, enter data correct ");
+    // create custom property
+    error.statusCode = 422;
+    throw error;
+  }
+  // checking file in request to validation
+  if (!req.file) {
+    const error = new Error("No Image Provided .");
+    err.statusCode = 422;
+    throw err;
+  }
+  const imageUrl = req.file.path;
+
+  title = req.body.title;
+  content = req.body.content;
+  // create post in DB.
+  const post = new Post({
+    title: title,
+    // imageUrl: "images/part-one/CROS.PNG",
+    imageUrl: imageUrl,
+    content: content,
+    creator: {
+      name: "Mohamedabdelaziz",
+    },
+  });
+  post
+    .save()
+    .then((result) => {
+      console.log(result);
+      res.status(201).json({
+        message: "The post created Successfully ",
+        post: result,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      // to Go Another Middleware handling error ...
+      next(err);
+    });
 }
