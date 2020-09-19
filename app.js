@@ -7,8 +7,10 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
-const feedRoutes = require("./routes/feed");
-const authRoutes = require("./routes/auth");
+const { graphqlHTTP } = require('express-graphql');
+
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
 
 MONGOOSE_URI = `mongodb+srv://mohamedabdelaziz:01282434860m@application-api-ctmzm.mongodb.net/blog?retryWrites=true&w=majority`;
 const app = express();
@@ -56,8 +58,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/feed", feedRoutes);
-app.use("/auth", authRoutes);
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+  })
+);
+
 // this middleware run when forward  after next(err) for any Error
 app.use((err, req, res, next) => {
   console.log(err);
