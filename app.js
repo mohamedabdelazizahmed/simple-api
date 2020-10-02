@@ -12,7 +12,7 @@ const { graphqlHTTP } = require("express-graphql");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
 
-MONGOOSE_URI = `mongodb+srv://mohamedabdelaziz:01282434860m@application-api-ctmzm.mongodb.net/blog?retryWrites=true&w=majority`;
+MONGOOSE_URI = `mongodb+srv://mohamedabdelaziz:01282434860m@application-api-ctmzm.mongodb.net/blog-graphql?retryWrites=true&w=majority`;
 const app = express();
 
 // uploading image
@@ -55,6 +55,9 @@ app.use((req, res, next) => {
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   next();
 });
 
@@ -64,13 +67,14 @@ app.use(
     schema: graphqlSchema,
     rootValue: graphqlResolver,
     graphiql: true,
-    formatError(err) {
+    customFormatErrorFn(err) {
+      // the originalError in graphql
       if (!err.originalError) {
         return err;
       }
       const data = err.originalError.data;
       const message = err.message || "An Error occurred !";
-      const data = err.originalError.code || 500;
+      const code = err.originalError.code || 500;
       return { message: message, status: code, data: data };
     },
   })

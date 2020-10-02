@@ -13,7 +13,7 @@ module.exports = {
     // const email = args.userInput.email;
     // const email = userInput.email;
     const errors = [];
-    if (validator.isEmail(userInput.email)) {
+    if (!validator.isEmail(userInput.email)) {
       errors.push({ message: "Email-invalid !" });
     }
     if (
