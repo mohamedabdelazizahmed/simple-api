@@ -11,6 +11,7 @@ const { graphqlHTTP } = require("express-graphql");
 
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
+const auth = require('./middleware/is-auth');
 
 MONGOOSE_URI = `mongodb+srv://mohamedabdelaziz:01282434860m@application-api-ctmzm.mongodb.net/blog-graphql?retryWrites=true&w=majority`;
 const app = express();
@@ -60,7 +61,8 @@ app.use((req, res, next) => {
   }
   next();
 });
-
+// this middleware now run for every request that riches GraphQL
+app.use(auth);
 app.use(
   "/graphql",
   graphqlHTTP({

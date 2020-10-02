@@ -3,9 +3,8 @@ const jwt = require("jwt");
 module.exports = (req, res, next) => {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
-        const error = new Error('Not authentication')
-        error.statusCode =401;
-        throw error;
+        req.isAuth = false;
+        next(); // to contain with middleware
     }
 
   //split white space after Bearer
@@ -13,15 +12,15 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, "somesupersecretsecret");
   } catch (err) {
-    err.statusCode = 500;
-    throw err;
+    req.isAuth = false;
+    next(); // to contain with middleware
   }
 
   if (!decodedToken) {
-    const error = new Error("Not authenticated.");
-    error.statusCode = 401;
-    throw error;
+    req.isAuth = false;
+    next(); // to contain with middleware
   }
   req.userId = decodedToken.userId;
+  req.isAuth = true;
   next();
 };
