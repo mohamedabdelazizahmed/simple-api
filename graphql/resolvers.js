@@ -61,7 +61,7 @@ module.exports = {
       throw error;
     }
     const token = jwt.sign(
-      {
+      {  
         userId: user._id.toString(),
         email: user.email,
       },
