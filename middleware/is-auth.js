@@ -4,7 +4,7 @@ module.exports = (req, res, next) => {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
         req.isAuth = false;
-        next(); // to contain with middleware
+        return next(); // to contain with middleware
     }
 
   //split white space after Bearer
@@ -13,12 +13,12 @@ module.exports = (req, res, next) => {
     decodedToken = jwt.verify(token, "somesupersecretsecret");
   } catch (err) {
     req.isAuth = false;
-    next(); // to contain with middleware
+    return dnext(); // to contain with middleware
   }
 
   if (!decodedToken) {
     req.isAuth = false;
-    next(); // to contain with middleware
+    return next(); // to contain with middleware
   }
   req.userId = decodedToken.userId;
   req.isAuth = true;

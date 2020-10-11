@@ -71,7 +71,7 @@ module.exports = {
     );
     return { token: token, userId: user._id.toString() };
   },
-
+ 
   async createPost({ postInput }, req) {
     if ( !req.isAuth ) {
         const error = new Error('Not Authenticated !');
@@ -82,7 +82,7 @@ module.exports = {
     if (
       validator.isEmpty(postInput.title) ||
       !validator.isLength(postInput.title, { min: 5 })
-    ) {
+     ) {
       errors.push({ message: "Title is invalid ." });
     }
     if (
@@ -102,7 +102,6 @@ module.exports = {
     const user  = await User.findById(req.userId);
     if (!user) {
       const error = new Error("Invalid user .");
-      error.data = errors;
       error.code = 401;
       throw error;
     }
@@ -110,14 +109,14 @@ module.exports = {
       title: postInput.title,
       content: postInput.content,
       imageUrl: postInput.imageUrl,
-      creator: user
+      creator: user 
     });
     const createdPost = await post.save();
-    // add post to users posts
+    // add post to users posts Because user has many posts
       user.posts.push(createdPost);
     return {
       ...createPost._doc,
-      _id: createdPost._id.toString(),
+      _id: createdPost._id.toString(), // you must return it string
       createdAt: createdPost.createdAt.toISOString(),
       updatedAt: createdPost.updatedAt.toISOString(),
     };
