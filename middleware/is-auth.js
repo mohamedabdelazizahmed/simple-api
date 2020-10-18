@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
     decodedToken = jwt.verify(token, "somesupersecretsecret");
   } catch (err) {
     req.isAuth = false;
-    return dnext(); // to contain with middleware
+    return next(); // to contain with middleware
   }
 
   if (!decodedToken) {
