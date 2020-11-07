@@ -71,18 +71,18 @@ module.exports = {
     );
     return { token: token, userId: user._id.toString() };
   },
- 
+
   async createPost({ postInput }, req) {
-    if ( !req.isAuth ) {
-        const error = new Error('Not Authenticated !');
-        error.cod = 401 ;
-        throw error;
+    if (!req.isAuth) {
+      const error = new Error("Not Authenticated !");
+      error.cod = 401;
+      throw error;
     }
     const errors = [];
     if (
       validator.isEmpty(postInput.title) ||
       !validator.isLength(postInput.title, { min: 5 })
-     ) {
+    ) {
       errors.push({ message: "Title is invalid ." });
     }
     if (
@@ -98,8 +98,8 @@ module.exports = {
       error.code = 422;
       throw error;
     }
-    // get User  for post 
-    const user  = await User.findById(req.userId);
+    // get User  for post
+    const user = await User.findById(req.userId);
     if (!user) {
       const error = new Error("Invalid user .");
       error.code = 401;
@@ -109,17 +109,37 @@ module.exports = {
       title: postInput.title,
       content: postInput.content,
       imageUrl: postInput.imageUrl,
-      creator: user 
+      creator: user,
     });
     const createdPost = await post.save();
     // add post to users posts Because user has many posts
-      user.posts.push(createdPost);
-      await user.save();
+    user.posts.push(createdPost);
+    await user.save();
     return {
       ...createPost._doc,
       _id: createdPost._id.toString(), // you must return it string
       createdAt: createdPost.createdAt.toISOString(),
       updatedAt: createdPost.updatedAt.toISOString(),
+    };
+  },
+
+  posts: async function (args, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not Authenticated !");
+      error.cod = 401;
+      throw error;
+    }
+    const totalPosts = await Post.find().countDocuments();
+    const posts = await Post.find().sort({ createdAt: -1 }).populate("creator");
+    return {
+      posts: posts.map((p) => {
+        return { ...p._doc,
+                  _id: p._id.toString(),
+                  createdAt: p.createdAt.toISOString(),
+                  updatedAt: p.updatedAt.toISOString()
+                };
+      }),
+      totalPosts:totalPosts
     };
   },
 };
